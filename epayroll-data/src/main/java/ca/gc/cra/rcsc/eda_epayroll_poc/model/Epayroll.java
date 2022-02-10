@@ -2,6 +2,14 @@ package ca.gc.cra.rcsc.eda_epayroll_poc.model;
 import java.time.LocalDate;
 import java.util.Date;
 
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowSet;
+import io.vertx.mutiny.sqlclient.Tuple;
+
 public class Epayroll {
 
     private String bn;
@@ -44,6 +52,30 @@ public class Epayroll {
         this.ei_insur_earnings = ei_insur_earnings;
     }
 
+    private static Epayroll from(Row row) {
+        return new Epayroll(
+            row.getString("bn"),
+            row.getString("employer_paydac"),
+            row.getString("employer_name"),
+            row.getLocalDate("pay_start"),
+            row.getLocalDate("pay_end"),
+            row.getString("employee_status"),
+            row.getString("employee_name"),
+            row.getInteger("sin"),
+            row.getString("employee_id"),
+            row.getDouble("gross_pay"),
+            row.getDouble("tax_deducted"),
+            row.getDouble("cpp_contrib"),
+            row.getDouble("cpp_pension_earn"),
+            row.getDouble("ei_contrib"),
+            row.getDouble("ei_insur_earnings")
+        );
+    }
+    public static Multi<Epayroll> findAll(PgPool client) {
+        return client.query("SELECT * FROM epayrolls").execute()
+                .onItem().transformToMulti(set -> Multi.createFrom().iterable(set))
+                .onItem().transform(Epayroll::from);
+    }
 
 
     public String getBn() {

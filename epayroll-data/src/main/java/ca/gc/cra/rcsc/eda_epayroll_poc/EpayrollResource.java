@@ -1,27 +1,23 @@
 package ca.gc.cra.rcsc.eda_epayroll_poc;
 
 
-import ca.gc.cra.rcsc.eda_epayroll_poc.model.EpayrollEntity;
-
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.Date;
-import java.time.LocalDate;
 import java.util.List;
-import javax.ws.rs.DELETE;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.text.*;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.core.Response;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.transaction.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import ca.gc.cra.rcsc.eda_epayroll_poc.model.EpayrollEntity;
+import ca.gc.cra.rcsc.eda_epayroll_poc.model.Epayroll;
+
+import io.smallrye.mutiny.Multi;
+import io.vertx.mutiny.pgclient.PgPool;
 
 
 @Produces(MediaType.APPLICATION_JSON)
@@ -29,9 +25,53 @@ import javax.transaction.Transactional;
 @Path("/epayroll")
 public class EpayrollResource {
 
+    @Inject
+    io.vertx.mutiny.pgclient.PgPool client;
 
     @Inject
-    EntityManager entityManager;
+    @ConfigProperty(name = "myapp.schema.create", defaultValue = "true") 
+    boolean schemaCreate;
+
+
+    @PostConstruct
+    void config() {
+        if (schemaCreate) {
+            initdb();
+        }
+    }
+
+    // public EpayrollResource(PgPool client) {
+    //     this.client = client;
+    // }
+    private void initdb() {
+        client.query("DROP TABLE IF EXISTS epayrolls").execute()
+            .flatMap(r -> client.query("CREATE TABLE epayrolls (
+                id SERIAL PRIMARY KEY, 
+                bn VARCHAR(255), 
+                employer_paydac VARCHAR(255), 
+                employer_name VARCHAR(255), 
+                pay_start LocalDate ,
+                pay_end LocalDate ,
+                employee_status VARCHAR(255),
+                employee_name VARCHAR(255),
+                employee_sin INT ,
+                employee_id VARCHAR(255),
+                gross_pay Numeric, 
+                tax_deducted Numeric,
+                cpp_contrib Numeric,
+                cpp_pension_earn Numeric,
+                ei_contrib Numeric,
+                ei_insur_earnings Numeric
+                )").execute())
+            .flatMap(r -> client.query("INSERT INTO epayrolls 
+            ( bn, employer_paydac,  employer_name, pay_start,  pay_end,  employee_status, employee_name, employee_sin, employee_id, gross_pay, tax_deducted, cpp_contrib, cpp_pension_earn, ei_contrib, ei_insur_earnings ) 
+            VALUES ('123456789RC0001','123456789RP0002','CRA','2020-10-24','2021-11-24','hired','Sam Doe',123466789,'65423',1500.00,150.00,75.00,33.00,17.00,28.00)"
+            ).execute())
+            .await().indefinitely();
+    }
+
+    // @Inject
+    // EntityManager entityManager;
 
     //private Set<Epayroll> epayrolls = Collections.newSetFromMap(Collections.synchronizedMap(new LinkedHashMap<>()));
 
@@ -49,14 +89,23 @@ public class EpayrollResource {
     //     return epayrolls;
     // }
 
+    // @GET
+    // @Path("/processed")
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public String storedList() {
+    //     List<EpayrollEntity> stored_epayrolls = entityManager.createNamedQuery("Epayrolls.findAll", EpayrollEntity.class).getResultList();
+    //     return stored_epayrolls.toString();
+    // }
     @GET
     @Path("/processed")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String storedList() {
-        List<EpayrollEntity> stored_epayrolls = entityManager.createNamedQuery("Epayrolls.findAll", EpayrollEntity.class).getResultList();
-        return stored_epayrolls.toString();
+    // @Produces(MediaType.APPLICATION_JSON)
+    public Multi<Epayroll> storedList() {
+        System.out.println(Epayroll.findAll(client));
+        // List<EpayrollEntity> stored_epayrolls = entityManager.createNamedQuery("Epayrolls.findAll", EpayrollEntity.class).getResultList();
+        return Epayroll.findAll(client);
     }
 
+    
 
     // @GET
     // @Path("hello")
