@@ -2,6 +2,7 @@ FROM dpage/pgadmin4 as pgadmin4
 
 USER root 
 RUN chown 1000750000:1000750000 /pgadmin4 && \
+    chown -R 5050:5050 /var/lib/pgadmin && \
     sed -i 's/5050/1000750000/g' /etc/passwd && \
     sed -i 's/5050/1000750000/g' /etc/group && \
     find / -user 5050 -exec chown 1000750000 {} \; && \
