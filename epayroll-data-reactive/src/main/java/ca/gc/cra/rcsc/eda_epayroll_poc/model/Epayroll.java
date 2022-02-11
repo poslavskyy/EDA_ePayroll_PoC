@@ -1,68 +1,40 @@
 package ca.gc.cra.rcsc.eda_epayroll_poc.model;
 import java.time.LocalDate;
 import java.util.Date;
-import java.math.BigDecimal;
 
 
-import javax.persistence.Cacheable;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.NamedQuery;
-import javax.persistence.QueryHint;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowSet;
+import io.vertx.mutiny.sqlclient.Tuple;
 
-import io.vertx.core.json.Json;
+public class Epayroll {
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-
-@Entity
-@NamedQuery(name = "Epayrolls.findAll", query = "SELECT e FROM EpayrollEntity e")
-public class EpayrollEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private int id;
-    @Column
     private String bn;
-    @Column
     private String employer_paydac;
-    @Column
     private String employer_name; //extract from bn
-    @Column
-    private Date  pay_start; // start time of pay
-    @Column
-    private Date  pay_end; // end time of pay
-    @Column
+    private LocalDate pay_start; // start time of pay
+    private LocalDate pay_end; // end time of pay
     private String employee_status; //new hire or laid off or n-a
-    @Column
     private String employee_name;
-    @Column
     private int employee_sin;
-    @Column
     private String employee_id; 
-    @Column
-    private BigDecimal gross_pay;
-    @Column
-    private BigDecimal tax_deducted;
-    @Column
-    private BigDecimal cpp_contrib;
-    @Column
-    private BigDecimal cpp_pension_earn; //CPP Pensionable Earnings
-    @Column
-    private BigDecimal ei_contrib; //
-    @Column
-    private BigDecimal ei_insur_earnings; //EI Insurable Earnings
+    private double gross_pay;
+    private double tax_deducted;
+    private double cpp_contrib;
+    private double cpp_pension_earn; //CPP Pensionable Earnings
+    private double ei_contrib; //
+    private double ei_insur_earnings; //EI Insurable Earnings
 
 
 
-    public EpayrollEntity() {
+    public Epayroll() {
 
     }
 
-    public EpayrollEntity(String bn,String employer_paydac, String employer_name,Date pay_start, Date pay_end, String employee_status,String employee_name,int employee_sin,String employee_id,BigDecimal gross_pay,BigDecimal tax_deducted,BigDecimal cpp_contrib,BigDecimal cpp_pension_earn,BigDecimal ei_contrib,BigDecimal ei_insur_earnings ) {
+    public Epayroll(String bn,String employer_paydac, String employer_name,LocalDate pay_start, LocalDate pay_end, String employee_status,String employee_name,int employee_sin,String employee_id,double gross_pay,double tax_deducted,double cpp_contrib,double cpp_pension_earn,double ei_contrib,double ei_insur_earnings ) {
         this.bn = bn;
         this.employer_paydac = employer_paydac;
         this.employer_name = employer_name;
@@ -80,21 +52,38 @@ public class EpayrollEntity {
         this.ei_insur_earnings = ei_insur_earnings;
     }
 
-   
+    private static Epayroll from(Row row) {
+        return new Epayroll(
+            row.getString("bn"),
+            row.getString("employer_paydac"),
+            row.getString("employer_name"),
+            row.getLocalDate("pay_start"),
+            row.getLocalDate("pay_end"),
+            row.getString("employee_status"),
+            row.getString("employee_name"),
+            row.getInteger("employee_sin"),
+            row.getString("employee_id"),
+            row.getDouble("gross_pay"),
+            row.getDouble("tax_deducted"),
+            row.getDouble("cpp_contrib"),
+            row.getDouble("cpp_pension_earn"),
+            row.getDouble("ei_contrib"),
+            row.getDouble("ei_insur_earnings")
+        );
+    }
+    public static Multi<Epayroll> findAll(PgPool client) {
+        return client.query("SELECT * FROM epayrolls").execute()
+                .onItem().transformToMulti(set -> Multi.createFrom().iterable(set))
+                .onItem().transform(Epayroll::from);
+    }
+
+
     public String getBn() {
         return this.bn;
     }
 
     public void setBn(String bn) {
         this.bn = bn;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getEmployer_paydac() {
@@ -113,19 +102,19 @@ public class EpayrollEntity {
         this.employer_name = employer_name;
     }
 
-    public Date getPay_start() {
+    public LocalDate getPay_start() {
         return this.pay_start;
     }
 
-    public void setPay_start(Date pay_start) {
+    public void setPay_start(LocalDate pay_start) {
         this.pay_start = pay_start;
     }
 
-    public Date getPay_end() {
+    public LocalDate getPay_end() {
         return this.pay_end;
     }
 
-    public void setPay_end(Date pay_end) {
+    public void setPay_end(LocalDate pay_end) {
         this.pay_end = pay_end;
     }
 
@@ -161,59 +150,53 @@ public class EpayrollEntity {
         this.employee_id = employee_id;
     }
 
-    public BigDecimal getGross_pay() {
+    public double getGross_pay() {
         return this.gross_pay;
     }
 
-    public void setGross_pay(BigDecimal gross_pay) {
+    public void setGross_pay(double gross_pay) {
         this.gross_pay = gross_pay;
     }
 
-    public BigDecimal getTax_deducted() {
+    public double getTax_deducted() {
         return this.tax_deducted;
     }
 
-    public void setTax_deducted(BigDecimal tax_deducted) {
+    public void setTax_deducted(double tax_deducted) {
         this.tax_deducted = tax_deducted;
     }
 
-    public BigDecimal getCpp_contrib() {
+    public double getCpp_contrib() {
         return this.cpp_contrib;
     }
 
-    public void setCpp_contrib(BigDecimal cpp_contrib) {
+    public void setCpp_contrib(double cpp_contrib) {
         this.cpp_contrib = cpp_contrib;
     }
 
-    public BigDecimal getCpp_pension_earn() {
+    public double getCpp_pension_earn() {
         return this.cpp_pension_earn;
     }
 
-    public void setCpp_pension_earn(BigDecimal cpp_pension_earn) {
+    public void setCpp_pension_earn(double cpp_pension_earn) {
         this.cpp_pension_earn = cpp_pension_earn;
     }
 
-    public BigDecimal getEi_contrib() {
+    public double getEi_contrib() {
         return this.ei_contrib;
     }
 
-    public void setEi_contrib(BigDecimal ei_contrib) {
+    public void setEi_contrib(double ei_contrib) {
         this.ei_contrib = ei_contrib;
     }
 
-    public BigDecimal getEi_insur_earnings() {
+    public double getEi_insur_earnings() {
         return this.ei_insur_earnings;
     }
 
-    public void setEi_insur_earnings(BigDecimal ei_insur_earnings) {
+    public void setEi_insur_earnings(double ei_insur_earnings) {
         this.ei_insur_earnings = ei_insur_earnings;
     }
-
-	@Override
-	public String toString() {
-		return Json.encode(this);
-	}
-    
     
 
 }
