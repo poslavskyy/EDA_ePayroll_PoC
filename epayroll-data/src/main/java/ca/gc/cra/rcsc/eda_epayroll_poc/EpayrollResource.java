@@ -28,28 +28,28 @@ public class EpayrollResource {
     @Inject
     io.vertx.mutiny.pgclient.PgPool client;
 
-    @Inject
-    @ConfigProperty(name = "myapp.schema.create", defaultValue = "true") 
-    boolean schemaCreate;
+    // @Inject
+    // @ConfigProperty(name = "myapp.schema.create", defaultValue = "true") 
+    // boolean schemaCreate;
 
 
-    @PostConstruct
-    void config() {
-        if (schemaCreate) {
-            initdb();
-        }
-    }
+    // @PostConstruct
+    // void config() {
+    //     if (schemaCreate) {
+    //         initdb();
+    //     }
+    // }
 
     // public EpayrollResource(PgPool client) {
     //     this.client = client;
     // }
-    private void initdb() {
-        client.query("DROP TABLE IF EXISTS epayrolls").execute()
-            .flatMap(r -> client.query("CREATE TABLE epayrolls (id SERIAL PRIMARY KEY, bn VARCHAR(255), employer_paydac VARCHAR(255), employer_name VARCHAR(255), pay_start LocalDate ,pay_end LocalDate ,employee_status VARCHAR(255),employee_name VARCHAR(255),employee_sin INT ,employee_id VARCHAR(255),gross_pay Numeric, tax_deducted Numeric,cpp_contrib Numeric,cpp_pension_earn Numeric,ei_contrib Numeric,ei_insur_earnings Numeric)").execute())
-            .flatMap(r -> client.query("INSERT INTO epayrolls ( bn, employer_paydac,  employer_name, pay_start,  pay_end,  employee_status, employee_name, employee_sin, employee_id, gross_pay, tax_deducted, cpp_contrib, cpp_pension_earn, ei_contrib, ei_insur_earnings ) VALUES ('123456789RC0001','123456789RP0002','CRA','2020-10-24','2021-11-24','hired','Sam Doe',123466789,'65423',1500.00,150.00,75.00,33.00,17.00,28.00)"
-            ).execute())
-            .await().indefinitely();
-    }
+    // private void initdb() {
+    //     client.query("DROP TABLE IF EXISTS epayrolls").execute()
+    //         .flatMap(r -> client.query("CREATE TABLE epayrolls (id SERIAL PRIMARY KEY, bn VARCHAR(255), employer_paydac VARCHAR(255), employer_name VARCHAR(255), pay_start LocalDate ,pay_end LocalDate ,employee_status VARCHAR(255),employee_name VARCHAR(255),employee_sin INT ,employee_id VARCHAR(255),gross_pay Numeric, tax_deducted Numeric,cpp_contrib Numeric,cpp_pension_earn Numeric,ei_contrib Numeric,ei_insur_earnings Numeric)").execute())
+    //         .flatMap(r -> client.query("INSERT INTO epayrolls ( bn, employer_paydac,  employer_name, pay_start,  pay_end,  employee_status, employee_name, employee_sin, employee_id, gross_pay, tax_deducted, cpp_contrib, cpp_pension_earn, ei_contrib, ei_insur_earnings ) VALUES ('123456789RC0001','123456789RP0002','CRA','2020-10-24','2021-11-24','hired','Sam Doe',123466789,'65423',1500.00,150.00,75.00,33.00,17.00,28.00)"
+    //         ).execute())
+    //         .await().indefinitely();
+    // }
 
     // @Inject
     // EntityManager entityManager;
