@@ -61,7 +61,7 @@ public class Epayroll {
             row.getLocalDate("pay_end"),
             row.getString("employee_status"),
             row.getString("employee_name"),
-            row.getInteger("sin"),
+            row.getInteger("employee_sin"),
             row.getString("employee_id"),
             row.getDouble("gross_pay"),
             row.getDouble("tax_deducted"),
