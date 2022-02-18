@@ -22,7 +22,7 @@ import java.io.IOException;
 public class InputResource {
 
     @Inject
-    @Channel("input-epayrolls")
+    @Channel("validate-data")
     Emitter<String> epayrollEmitter; 
 
 
