@@ -18,8 +18,8 @@ public class GreetingResource {
     @Inject
     GreetingService service;
     
-    @Channel("error-data")
-    Emitter<String> errorDataEmitter;
+    @Channel("json-data")
+    Emitter<String> jsonDataEmitter;
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -41,7 +41,7 @@ public class GreetingResource {
     @Consumes(MediaType.TEXT_PLAIN)
     public String sendErrorData(String data) {
  
-    	errorDataEmitter.send(data);
+    	jsonDataEmitter.send(data);
     	
     	String result = "Sent:" + data;
     	System.out.println(result);
