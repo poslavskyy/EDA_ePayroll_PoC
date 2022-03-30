@@ -17,7 +17,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import ca.gc.cra.rcsc.eda_epayroll_poc.*;
-
+import javax.ws.rs.core.Response; 
 
 @Path("/sinValidation")
 public class SinResource {
