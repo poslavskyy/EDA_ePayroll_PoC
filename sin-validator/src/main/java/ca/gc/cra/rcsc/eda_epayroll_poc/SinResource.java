@@ -23,16 +23,7 @@ import ca.gc.cra.rcsc.eda_epayroll_poc.*;
 public class SinResource {
 
     @Inject
-    Validator validator;
-
-    @Inject
     SinService sinService;
-
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String hello() {
-        return "hello";
-    }
 
    
     @Path("/service-method-validation")
@@ -46,20 +37,20 @@ public class SinResource {
             boolean isSinVlaid = sinService.isValid(sin);
             if(isSinVlaid){
                 json.put("response_code", 200);
+                return Response.status(200).entity(json.toString()).build();
             }
             else{
-                //json.put("isSinValid", new Boolean(false));
-                // json.put("data",obj);
                 json.put("errorDescription","Received data contains a sin number with digits more than or less than 9");
                 json.put("response_code",101);
+                return Response.status(500).entity(json.toString()).build();
             }
-            return json.toString();
+           
         } catch (JSONException e){
             JSONObject notJson = new JSONObject();
             notJson.put("errorDescription","Received data is not json parseable");
             notJson.put("response_code",400);
             // notJson.put("data",obj);
-            return notJson.toString();
+            return Response.status(400).entity(notJson.toString()).build();
         }
 
 }

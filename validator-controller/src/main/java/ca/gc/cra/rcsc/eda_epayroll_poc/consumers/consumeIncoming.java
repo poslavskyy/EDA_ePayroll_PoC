@@ -1,5 +1,5 @@
 package ca.gc.cra.rcsc.eda_epayroll_poc.consumers;
-
+import java.util.*;
 import org.json.*;  
 import ca.gc.cra.rcsc.eda_epayroll_poc.models.*;
 import java.util.Set;
@@ -24,10 +24,14 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 
 @ApplicationScoped
 public class consumeIncoming {
+
+    @ConfigProperty(name = "validators.url",defaultValue = "epayrollValidator='http://epayroll-validator-eda-epayroll-poc.apps.ocp4.omega.dce-eir.net/epayrollValidation/service-method-validation'") 
+    Map<String, String> urls;
 
     @Inject
     Validator validator;
@@ -40,72 +44,47 @@ public class consumeIncoming {
     @Channel("output-error-data")
     Emitter<String> errorEmitter;
     
-    
-    @Inject
-    @RestClient
-    ValidateSinService validateSinService;
 
-    @Inject
-    @RestClient
-    ValidateBnService validateBnService;
+    public JSONObject executePost(String u,String obj){
+        String u1 = u.substring(1,u.length() - 1);
+        System.out.println("url is : " + u.substring(1,u.length() - 1));
+        System.out.println("obj to post is : " + obj);  
+        RestAssured.baseURI =u1;
+        RequestSpecification request = RestAssured.given(); 
 
-    @Inject
-    @RestClient
-    ValidateEpayrollService validateEpayrollService;
+        // Add a header stating the Request body is a JSON
+        request.header("Content-Type", "application/json");
 
-
-    @Incoming("validator-epayrolls")                                    
-    public void process(String obj) {
-        System.out.println("Received string is "+ obj);
-        String epayrollValidatorRes = validateEpayrollService.validateEpayroll(obj);
-        JSONObject epayrollValidatorResJson = new JSONObject(epayrollValidatorRes);
-        System.out.println("Received epayrollValidatorRes is "+ epayrollValidatorRes);
-
-        int epayrollResCode = epayrollValidatorResJson.getInt("responseCode"); 
-        if(epayrollResCode == 200){
-            String res = validateSinService.validateSin(obj);
-          
-            System.out.println("Received validateSinServiceRes is "+ res);
-            
-
-            JSONObject sinValidatorResJson = new JSONObject(res);
-           
-
-            int resCode = sinValidatorResJson.getInt("response_code"); 
-           
-            if(resCode == 200){
-                String res_bn = validateBnService.validateBn(obj);
-                System.out.println("Received validateBnServiceRes is "+ res_bn);
-                JSONObject bnValidatorResJson = new JSONObject(res_bn);
-                int resCodeBn = bnValidatorResJson.getInt("response_code"); 
-
-                if(resCodeBn == 200){
-                    //sinValidatorResJson.remove("response_code");
-                    bnValidatorResJson.remove("response_code");
-                    validEmitter.send(bnValidatorResJson.toString());
-                    System.out.println("Message sent from if staement of response 200 inside bn conditional" );
-                }else{
-                    bnValidatorResJson.put("errorNumber",resCodeBn);
-                    bnValidatorResJson.remove("response_code");
-                    errorEmitter.send(bnValidatorResJson.toString());
-                    System.out.println("Message sent from else staement inside bn conditional" );
-                }   
-            }else{
-                sinValidatorResJson.put("errorNumber",resCode);
-                sinValidatorResJson.remove("response_code");
-                errorEmitter.send(sinValidatorResJson.toString());
-                System.out.println("Message sent from else staement inside sin conditional" );
-            }       
-        }else{
-            epayrollValidatorResJson.put("errorNumber",epayrollResCode);
-            epayrollValidatorResJson.remove("responseCode");
-            errorEmitter.send(epayrollValidatorResJson.toString());
-            System.out.println("Message sent from else staement inside epayroll validation conditional" );
-
-        }  
-
-       
+        // Add the Json to the body of the request
+        request.body(obj);
+        Response response = request.post("/");
+        // int statusCode = response.getStatusCode();
+        System.out.println("Response body: " + response.body().asString());
+        JSONObject responseObj = new JSONObject(response.body().asString());
+        return responseObj;
     }
+
+    @Incoming("validator-epayrolls")   
+    public void validate(String obj){
+    Boolean valid = true;  
+    for (String u : urls.values()) { 
+        JSONObject responseObj = executePost(u,obj);
+        int statusCode = responseObj.getInt("response_code");
+        if(statusCode!=200){ 
+            responseObj.put("errorNumber",statusCode);
+            responseObj.remove("response_code");
+            errorEmitter.send(responseObj.toString());
+            System.out.println("invalid data: "+responseObj.toString() );
+            valid = false;
+        }
+
+    }
+    if(valid){
+        //JSONObject validObj = new JSONObject(obj);
+        validEmitter.send(obj);
+        System.out.println("valid data:" + obj);
+    } 
+    } 
 
 
 }

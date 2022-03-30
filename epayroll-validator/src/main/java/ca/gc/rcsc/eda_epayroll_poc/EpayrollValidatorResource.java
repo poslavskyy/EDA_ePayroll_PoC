@@ -32,8 +32,6 @@ public class EpayrollValidatorResource {
     @Inject
     Validator validator;
 
-
-
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() {
@@ -59,24 +57,24 @@ public class EpayrollValidatorResource {
                 mapCheck.put("valid","f");              
             }
         });
-
+    
         if(mapCheck.get("valid") == "f"){
             toReturn.put("data",obj);
             toReturn.put("errorDescription","Received data does not contains these properties: " + missingKeys );
-            toReturn.put("responseCode",500);
+            toReturn.put("response_code",500);
             // System.out.println("toReturn is "+ toReturn.toString());
             System.out.println("sending error string is "+ toReturn.toString());
-            return toReturn.toString(); 
+            return Response.status(500).entity(toReturn.toString()).build();
+            //return toReturn.toString(); 
         }
         else{
             Epayroll receivedStringToJson = mapper.readValue(obj, Epayroll.class);
-            // JSONObject receivedData = new JSONObject(obj);
-            // receivedData.put("responseCode",200);
-            // System.out.println("receivedData is "+ receivedData.toString());
             JSONObject jMap = new JSONObject(map);
-            jMap.put("responseCode",200);
+            jMap.put("response_code",200);
             System.out.println("sending string is "+ jMap.toString());
-            return jMap.toString();
+           // return jMap.toString();
+            return Response.status(200).entity(jMap.toString()).build();
+            
         }
             
         }catch(UnrecognizedPropertyException u){
@@ -84,19 +82,23 @@ public class EpayrollValidatorResource {
             JSONObject errorData = new JSONObject();
             errorData.put("data",obj);
             errorData.put("errorDescription","Received data contains more or less properties than expected");
-            errorData.put("responseCode",500);
+            errorData.put("response_code",500);
             System.out.println("errorData is "+ errorData.toString());
-            return errorData.toString();
-
+           //return errorData.toString();
+            return Response.status(500).entity(errorData.toString()).build();
+    
+    
         }catch(JsonProcessingException j)
         {
             j.printStackTrace();
             JSONObject errorData = new JSONObject();
             errorData.put("data",obj);
             errorData.put("errorDescription","Received data cannot be parsed into JSON format");
-            errorData.put("responseCode",400);
+            errorData.put("response_code",400);
             System.out.println("errorData is "+ errorData.toString());
-            return errorData.toString();
+           // return errorData.toString();
+            return Response.status(500).entity(errorData.toString()).build();
+    
             
         }
 }
