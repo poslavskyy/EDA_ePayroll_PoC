@@ -30,7 +30,7 @@ public class SinResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String tryMeServiceMethodValidation(String obj) {
+    public Response tryMeServiceMethodValidation(String obj) {
         try{
             JSONObject json = new JSONObject(obj);
             int sin = json.getInt("employee_sin"); 

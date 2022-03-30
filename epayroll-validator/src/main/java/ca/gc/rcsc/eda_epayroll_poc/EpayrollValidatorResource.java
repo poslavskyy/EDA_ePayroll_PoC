@@ -43,7 +43,7 @@ public class EpayrollValidatorResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String tryMeServiceMethodValidation(String obj) {
+    public Response tryMeServiceMethodValidation(String obj) {
         System.out.println("receivedString is "+ obj);
         HashMap<String, Object> mapCheck = new HashMap<String, Object>();        
         Set<String> epayrollkeySet = new HashSet<>(Arrays.asList("bn", "employer_paydac",  "employer_name", "pay_start",  "pay_end",  "employee_status", "employee_name", "employee_sin", "employee_id", "gross_pay", "tax_deducted", "cpp_contrib", "cpp_pension_earn", "ei_contrib", "ei_insur_earnings"));

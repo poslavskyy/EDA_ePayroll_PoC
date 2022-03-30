@@ -38,7 +38,7 @@ public class ValidatorResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String tryMeServiceMethodValidation(String obj) {
+    public Response tryMeServiceMethodValidation(String obj) {
         System.out.println("Received data is " + obj);
         try{
             JSONObject json = new JSONObject(obj);
