@@ -11,7 +11,7 @@ import ca.gc.cra.rcsc.eda_epayroll_poc.GreetingService;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
-
+import org.eclipse.microprofile.reactive.messaging.Incoming;
 @Path("/hello")
 public class GreetingResource {
 
@@ -48,4 +48,9 @@ public class GreetingResource {
     	
     	return result;
     }
+
+    @Incoming("getting-started")   
+    public void test_consumer(String obj){
+    	System.out.println("Received msg is "+ obj);
+    } 
 }
