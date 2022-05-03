@@ -18,7 +18,7 @@ export class ErrorsService {
 
     this.http
       .get<any>(
-        'http://error-eda-epayroll-poc.apps.xnkpeyx0.canadacentral.aroapp.io/json',
+        'https://error-serverless-eda-epayroll-poc2.apps.xnkpeyx0.canadacentral.aroapp.io/json',
         { headers }
       )
       .subscribe({
@@ -31,7 +31,7 @@ export class ErrorsService {
       });
 
     return this.http.get<any>(
-      'http://error-eda-epayroll-poc.apps.xnkpeyx0.canadacentral.aroapp.io/json',
+      'https://error-serverless-eda-epayroll-poc2.apps.xnkpeyx0.canadacentral.aroapp.io/json',
       { headers }
     );
   }
