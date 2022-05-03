@@ -17,12 +17,12 @@ public class JsonDAO {
 	private static final String SQL_INSERT_DATA_END = "\')";
 	
 	private static final String DB_TYPE = "jdbc:postgresql";
-	private static final String DB_HOST = "errorpostgresql"; //"errorpostgresql-eda-epayroll-poc.apps.ocp4.omega.dce-eir.net"
+	private static final String DB_HOST = "epayrollerrordb"; //"errorpostgresql-eda-epayroll-poc.apps.ocp4.omega.dce-eir.net"
 	private static final String DB_PORT = "5432";
 	
-	private static final String BACKUP_DB_NAME = "jsondb";
-	private static final String BACKUP_USER_NAME = "yuriy";
-	private static final String BACKUP_PASSWORD = "1234";
+	private static final String BACKUP_DB_NAME = "epayrollerrordb";
+	private static final String BACKUP_USER_NAME = "user8YI";
+	private static final String BACKUP_PASSWORD = "KnDie2l7bimY6pRM";
 	
 	private Connection connection;
 	
